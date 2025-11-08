@@ -4,6 +4,7 @@ import { hotelService } from '../services/api';
 import ReviewItem from '../components/ReviewItem';
 import ReviewForm from '../components/ReviewForm';
 import SentimentBadge from '../components/SentimentBadge';
+import ReviewSummary from '../components/ReviewSummary';
 
 const HotelDetail = () => {
   const { id } = useParams();
@@ -138,6 +139,13 @@ const HotelDetail = () => {
           </div>
         </div>
       )}
+
+      {/* Review Summary */}
+      <ReviewSummary 
+        hotelId={parseInt(id)} 
+        hotelName={hotel.name} 
+        totalReviews={hotel.total_reviews} 
+      />
 
       {/* Review Form */}
       <ReviewForm hotelId={parseInt(id)} onReviewAdded={handleReviewAdded} />

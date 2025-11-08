@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 from database import get_db, Hotel, Review
 from sentiment import sentiment_analyzer
+from summarization import review_summarizer
 import models
 
 # Initialize FastAPI app
@@ -65,6 +66,21 @@ class HotelDetailResponse(BaseModel):
     average_sentiment: float
     total_reviews: int
     reviews: List[ReviewResponse]
+
+class SummarizationRequest(BaseModel):
+    hotel_id: Optional[int] = None
+    hotel_name: Optional[str] = None
+    max_length: Optional[int] = 150
+    min_length: Optional[int] = 30
+
+class SummarizationResponse(BaseModel):
+    hotel_id: int
+    hotel_name: str
+    summary: str
+    total_reviews: int
+    processed_reviews: int
+    input_length: Optional[int] = None
+    error: Optional[str] = None
 
 @app.on_event("startup")
 async def startup_event():
@@ -177,6 +193,66 @@ async def create_review(request: ReviewCreateRequest, db: Session = Depends(get_
         sentiment_label=review.sentiment_label,
         sentiment_score=review.sentiment_score,
         created_at=review.created_at.isoformat()
+    )
+
+@app.post("/summarize", response_model=SummarizationResponse)
+async def summarize_reviews(request: SummarizationRequest, db: Session = Depends(get_db)):
+    """
+    Generate a summary of all reviews for a specific hotel
+    
+    Accepts either hotel_id or hotel_name to identify the hotel.
+    Returns a concise summary of all reviews for that hotel.
+    """
+    # Validate input - either hotel_id or hotel_name must be provided
+    if not request.hotel_id and not request.hotel_name:
+        raise HTTPException(
+            status_code=400, 
+            detail="Either hotel_id or hotel_name must be provided"
+        )
+    
+    # Find the hotel
+    hotel = None
+    if request.hotel_id:
+        hotel = models.get_hotel(db, hotel_id=request.hotel_id)
+    elif request.hotel_name:
+        hotel = models.get_hotel_by_name(db, hotel_name=request.hotel_name)
+    
+    if hotel is None:
+        raise HTTPException(
+            status_code=404, 
+            detail="Hotel not found"
+        )
+    
+    # Get all reviews for the hotel
+    reviews = models.get_hotel_reviews(db, hotel_id=hotel.id)
+    
+    if not reviews:
+        return SummarizationResponse(
+            hotel_id=hotel.id,
+            hotel_name=hotel.name,
+            summary="No reviews available for this hotel yet.",
+            total_reviews=0,
+            processed_reviews=0
+        )
+    
+    # Extract review texts
+    review_texts = [review.review_text for review in reviews if review.review_text]
+    
+    # Generate summary
+    summary_result = review_summarizer.summarize_reviews(
+        review_texts,
+        max_length=request.max_length,
+        min_length=request.min_length
+    )
+    
+    return SummarizationResponse(
+        hotel_id=hotel.id,
+        hotel_name=hotel.name,
+        summary=summary_result["summary"],
+        total_reviews=summary_result["total_reviews"],
+        processed_reviews=summary_result["processed_reviews"],
+        input_length=summary_result.get("input_length"),
+        error=summary_result.get("error")
     )
 
 if __name__ == "__main__":

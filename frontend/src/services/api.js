@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'http://localhost:8001';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -38,6 +38,31 @@ export const sentimentService = {
   // Analyze sentiment of text
   analyzeSentiment: async (text) => {
     const response = await api.post('/analyze', { text });
+    return response.data;
+  },
+};
+
+// Summarization API
+export const summarizationService = {
+  // Summarize reviews for a hotel
+  summarizeReviews: async (hotelId, options = {}) => {
+    const requestData = {
+      hotel_id: hotelId,
+      max_length: options.maxLength || 150,
+      min_length: options.minLength || 30
+    };
+    const response = await api.post('/summarize', requestData);
+    return response.data;
+  },
+
+  // Summarize reviews by hotel name
+  summarizeReviewsByName: async (hotelName, options = {}) => {
+    const requestData = {
+      hotel_name: hotelName,
+      max_length: options.maxLength || 150,
+      min_length: options.minLength || 30
+    };
+    const response = await api.post('/summarize', requestData);
     return response.data;
   },
 };
