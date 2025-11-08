@@ -48,19 +48,8 @@ export const summarizationService = {
   summarizeReviews: async (hotelId, options = {}) => {
     const requestData = {
       hotel_id: hotelId,
-      max_length: options.maxLength || 150,
-      min_length: options.minLength || 30
-    };
-    const response = await api.post('/summarize', requestData);
-    return response.data;
-  },
-
-  // Summarize reviews by hotel name
-  summarizeReviewsByName: async (hotelName, options = {}) => {
-    const requestData = {
-      hotel_name: hotelName,
-      max_length: options.maxLength || 150,
-      min_length: options.minLength || 30
+      max_length: options.maxLength || 100,
+      min_length: options.minLength || 20
     };
     const response = await api.post('/summarize', requestData);
     return response.data;

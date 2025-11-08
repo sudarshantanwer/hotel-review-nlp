@@ -143,7 +143,6 @@ const HotelDetail = () => {
       {/* Review Summary */}
       <ReviewSummary 
         hotelId={parseInt(id)} 
-        hotelName={hotel.name} 
         totalReviews={hotel.total_reviews} 
       />
 

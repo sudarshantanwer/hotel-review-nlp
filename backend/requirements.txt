@@ -3,10 +3,5 @@ uvicorn[standard]
 sqlalchemy
 transformers
 torch
-torchvision
-torchaudio
 sentencepiece
 accelerate
-textblob
-scikit-learn
-pandas

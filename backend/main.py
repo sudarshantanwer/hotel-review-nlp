@@ -11,16 +11,10 @@ import models
 # Initialize FastAPI app
 app = FastAPI(title="Hotel Review Sentiment Analysis API", version="1.0.0")
 
-# Configure CORS
+# Configure CORS - simplified for development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000", 
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:3000",
-        "*"  # Allow all origins for development
-    ],
+    allow_origins=["*"],  # Allow all origins for development
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -70,8 +64,8 @@ class HotelDetailResponse(BaseModel):
 class SummarizationRequest(BaseModel):
     hotel_id: Optional[int] = None
     hotel_name: Optional[str] = None
-    max_length: Optional[int] = 150
-    min_length: Optional[int] = 30
+    max_length: Optional[int] = 100
+    min_length: Optional[int] = 20
 
 class SummarizationResponse(BaseModel):
     hotel_id: int
@@ -79,7 +73,7 @@ class SummarizationResponse(BaseModel):
     summary: str
     total_reviews: int
     processed_reviews: int
-    input_length: Optional[int] = None
+    model_used: Optional[str] = None
     error: Optional[str] = None
 
 @app.on_event("startup")
@@ -251,7 +245,7 @@ async def summarize_reviews(request: SummarizationRequest, db: Session = Depends
         summary=summary_result["summary"],
         total_reviews=summary_result["total_reviews"],
         processed_reviews=summary_result["processed_reviews"],
-        input_length=summary_result.get("input_length"),
+        model_used=summary_result.get("model_used"),
         error=summary_result.get("error")
     )
 
