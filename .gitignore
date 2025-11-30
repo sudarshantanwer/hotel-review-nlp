@@ -283,3 +283,45 @@ config/secrets.json
 *.swp
 *.swo
 *~
+
+# AWS & Infrastructure Security - CRITICAL: Never commit these!
+# AWS Credentials & Config
+.aws/
+aws-credentials.json
+credentials.json
+config.json
+
+# Terraform State & Variables (may contain secrets)
+terraform.tfstate
+terraform.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+*.tfvars
+terraform-outputs.json
+
+# Environment Files (may contain secrets)
+.env
+.env.local
+.env.production
+.env.staging
+.env.development
+
+# Security Keys & Certificates
+*.pem
+*.key
+*.p12
+*.pfx
+private.key
+public.key
+
+# Database Files with potential sensitive data
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs that may contain sensitive data
+logs/
+*.log
+
+# AWS Deployment Scripts Output
+deployment-outputs.json

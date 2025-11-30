@@ -1,0 +1,41 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - BACKEND_REPOSITORY_URI=$BACKEND_REPOSITORY_URI
+      - FRONTEND_REPOSITORY_URI=$FRONTEND_REPOSITORY_URI
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+  build:
+    commands:
+      - echo Build started on `date`
+      
+      # Build backend
+      - echo Building the Backend Docker image...
+      - cd backend
+      - docker build -t $BACKEND_REPOSITORY_URI:latest .
+      - docker tag $BACKEND_REPOSITORY_URI:latest $BACKEND_REPOSITORY_URI:$IMAGE_TAG
+      - cd ..
+      
+      # Build frontend
+      - echo Building the Frontend Docker image...
+      - cd frontend
+      - docker build -t $FRONTEND_REPOSITORY_URI:latest .
+      - docker tag $FRONTEND_REPOSITORY_URI:latest $FRONTEND_REPOSITORY_URI:$IMAGE_TAG
+      - cd ..
+      
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      
+      # Push backend image
+      - echo Pushing the Backend Docker image...
+      - docker push $BACKEND_REPOSITORY_URI:latest
+      - docker push $BACKEND_REPOSITORY_URI:$IMAGE_TAG
+      
+      # Push frontend image
+      - echo Pushing the Frontend Docker image...
+      - docker push $FRONTEND_REPOSITORY_URI:latest
+      - docker push $FRONTEND_REPOSITORY_URI:$IMAGE_TAG

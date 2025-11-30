@@ -1,11 +1,33 @@
+import os
+import json
+import boto3
 from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, Text, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
 
-DATABASE_URL = "sqlite:///./hotel_reviews.db"
+# Database URL from environment or default to SQLite for development
+DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./hotel_reviews.db")
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+# For production, get database credentials from AWS Secrets Manager
+if os.environ.get("DB_SECRET_ARN"):
+    try:
+        secrets_client = boto3.client('secretsmanager')
+        secret_response = secrets_client.get_secret_value(
+            SecretId=os.environ.get("DB_SECRET_ARN")
+        )
+        secret_data = json.loads(secret_response['SecretString'])
+        
+        DATABASE_URL = f"postgresql://{secret_data['username']}:{secret_data['password']}@{secret_data['host']}:{secret_data['port']}/{secret_data['dbname']}"
+    except Exception as e:
+        print(f"Failed to get database credentials from Secrets Manager: {e}")
+        # Fallback to SQLite for development
+        DATABASE_URL = "sqlite:///./hotel_reviews.db"
+
+# Connection args for SQLite
+connect_args = {"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
+
+engine = create_engine(DATABASE_URL, connect_args=connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 

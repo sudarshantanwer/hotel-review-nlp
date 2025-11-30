@@ -2,6 +2,28 @@
 
 > A full-stack web application that allows users to submit hotel reviews and automatically analyzes their sentiment using advanced NLP techniques.
 
+## 🚀 **DEPLOY TO AWS (MUMBAI) - 3 Easy Options**
+
+### **Option 1: AWS Console (Recommended)** ⭐
+1. Push to GitHub: `git push origin main`
+2. Go to [AWS CloudFormation (Mumbai)](https://ap-south-1.console.aws.amazon.com/cloudformation)
+3. Create Stack → Upload Template → `aws-infrastructure/cloudformation/main-stack.yaml`
+4. **Cost**: ~₹3,800/month (~$45 USD) | **Time**: 25-40 minutes
+
+### **Option 2: Command Line**
+```bash
+./scripts/deploy.sh prod ap-south-1
+./scripts/monitor-deployment.sh  # Monitor progress
+```
+
+### **Option 3: GitHub Actions CI/CD**
+- Add AWS credentials to GitHub Secrets
+- Auto-deploy on every push
+
+📖 **Detailed Guide**: [DEPLOY_AWS_CONSOLE.md](./DEPLOY_AWS_CONSOLE.md)
+
+---
+
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
